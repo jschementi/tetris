@@ -273,6 +273,16 @@
       return stopped;
     }
 
+    function processLines () {
+      for (var i = 0; i < board.length; i++) {
+        if (_.all(board[i], function (block) { return block !== ' '; })) {
+          board.splice(i, 1);
+          board.unshift([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']);
+        }
+      }
+      renderBoard(board);
+    }
+
     var renderLoopInterval = null;
     var paused = true;
 
@@ -281,6 +291,7 @@
       renderLoopInterval = setInterval(function () {
         var stopped = translateCurrentPiece([1, 0]);
         if (stopped) {
+          processLines();
           addNewPiece(getNextPiece());
         }
       }, 250);
