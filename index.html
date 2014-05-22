@@ -74,11 +74,15 @@
       height: 50px;
       background: none;
     }
+    #line-count {
+      float: right;
+    }
   </style>
 </head>
 <body>
   <div id="tetris">
     <div id="current-piece"></div>
+    <div id="line-count"></div>
     <div id="board">
     </div>
     <button name="start">Start</button>
@@ -154,6 +158,8 @@
     var boardHeight = board.length;
 
     var currentPiece = null;
+
+    var lineCount = 0;
 
     function rotateCurrentPiece (direction) {
       var curp = currentPiece;
@@ -321,6 +327,7 @@
         if (_.all(board[i], function (block) { return block !== ' '; })) {
           board.splice(i, 1);
           board.unshift([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']);
+          renderLineCount(++lineCount);
         }
       }
       renderBoard(board);
@@ -360,6 +367,10 @@
           }
           el.append($('<div/>').addClass('next'));
         }
+      },
+
+      renderLineCount: function (lineCount) {
+        $('#line-count').html(lineCount);
       }
     };
 
@@ -372,12 +383,14 @@
     var currentRenderer = HTMLRenderer;
 
     var renderBoard = currentRenderer.renderBoard;
+    var renderLineCount = currentRenderer.renderLineCount;
 
     renderBoard(board);
 
     function init () {
       movePiece();
       addNewPiece(getNextPiece());
+      renderLineCount(lineCount);
     }
 
     var started = false;
