@@ -50,6 +50,7 @@
     <div id="current-piece"></div>
     <div id="board">
     </div>
+    <button name="start">Start</button>
   </div>
   <script src="bower_components/lodash/dist/lodash.js"></script>
   <script src="bower_components/zepto/zepto.js"></script>
@@ -188,6 +189,7 @@
       window.addEventListener("keydown", moveSomething, false);
 
       function moveSomething(e) {
+        if (paused) return;
         switch(e.keyCode) {
           case 37:
             // left key pressed
@@ -271,12 +273,25 @@
       return stopped;
     }
 
-    var renderLoopInterval = setInterval(function () {
-      var stopped = translateCurrentPiece([1, 0]);
-      if (stopped) {
-        addNewPiece(getNextPiece());
-      }
-    }, 250);
+    var renderLoopInterval = null;
+    var paused = true;
+
+    function startRenderLoop () {
+      if (!paused) return;
+      renderLoopInterval = setInterval(function () {
+        var stopped = translateCurrentPiece([1, 0]);
+        if (stopped) {
+          addNewPiece(getNextPiece());
+        }
+      }, 250);
+      paused = false;
+    }
+
+    function pauseRenderLoop () {
+      if (paused) return;
+      clearInterval(renderLoopInterval);
+      paused = true;
+    }
 
     var HTMLRenderer = {
       renderBoard: function (board) {
@@ -310,6 +325,21 @@
       movePiece();
       addNewPiece(getNextPiece());
     }
+
+    var started = false;
+    $('button[name=start]').click(function () {
+      if (!started) {
+        init();
+        started = true;
+      }
+      if (paused) {
+        startRenderLoop();
+        $(this).html('Pause');
+      } else {
+        pauseRenderLoop();
+        $(this).html('Resume');
+      }
+    });
 
   </script>
 </body>
