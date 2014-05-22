@@ -6,44 +6,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tetris</title>
   <style>
-    #board .block {
+    .block {
       width: 20px;
       height: 20px;
       background: gray;
       float: left;
       border: 1px solid gray;
     }
-    #board .next {
+    .next {
       clear: left;
     }
-    #board .space {
+    .space {
       width: 20px;
       height: 20px;
       background: none;
       float: left;
       border: 1px solid #eee;
     }
-    #board .block.r {
+    #next-piece .space {
+      border: 1px solid white;
+      width: 10px;
+      height: 10px;
+    }
+    #next-piece .block {
+      width: 10px;
+      height: 10px;
+    }
+    .block.r {
       background: red;
       border: 1px solid red;
     }
-    #board .block.c {
+    .block.c {
       background: cyan;
       border: 1px solid cyan;
     }
-    #board .block.g {
+    .block.g {
       background: green;
       border: 1px solid green;
     }
-    #board .block.b {
+    .block.b {
       background: blue;
       border: 1px solid blue;
     }
-    #board .block.y {
+    .block.y {
       background: yellow;
       border: 1px solid yellow;
     }
-    #board .block.m {
+    .block.m {
       background: magenta;
       border: 1px solid magenta;
     }
@@ -77,15 +86,18 @@
     #line-count {
       float: right;
     }
+    #next-piece {
+      float: right;
+    }
   </style>
 </head>
 <body>
   <div id="tetris">
-    <div id="current-piece"></div>
-    <div id="line-count"></div>
+    <div id="next-piece"></div>
     <div id="board">
     </div>
     <button name="start">Start</button>
+    <div id="line-count"></div>
     <div id="keypad">
       <div id="space"></div>
       <div id="up" data-keycode="38">&#9650;</div>
@@ -210,7 +222,20 @@
       renderBoard(board);
     }
 
+    var nextPiece = null;
+
+    function queueRandomPiece () {
+      var piece = getRandomPiece();
+      nextPiece = piece;
+    }
+
     function getNextPiece () {
+      var piece = nextPiece;
+      queueRandomPiece();
+      return piece;
+    }
+
+    function getRandomPiece () {
       return pieces[Math.floor(Math.random() * pieces.length)];
     }
 
@@ -227,6 +252,7 @@
       }
       currentPiece = curp;
       renderBoard(board);
+      renderNextPiece();
     }
 
     function movePiece () {
@@ -371,6 +397,25 @@
 
       renderLineCount: function (lineCount) {
         $('#line-count').html(lineCount);
+      },
+
+      renderNextPiece: function () {
+        $('#next-piece').html(this.renderPiece(nextPiece));
+      },
+
+      renderPiece: function (piece) {
+        var el = $('<div/>').addClass('piece');
+        for (var i = 0; i < piece.length; i++) {
+          var block = piece[i];
+          if (block === ' ') {
+            el.append($('<div/>').addClass('space'));
+          } else if (block === '\n') {
+            el.append($('<div/>').addClass('next'));
+          } else {
+            el.append($('<div/>').addClass('block').addClass(block));
+          }
+        }
+        return el;
       }
     };
 
@@ -382,13 +427,15 @@
 
     var currentRenderer = HTMLRenderer;
 
-    var renderBoard = currentRenderer.renderBoard;
-    var renderLineCount = currentRenderer.renderLineCount;
+    var renderBoard = _.bind(currentRenderer.renderBoard, currentRenderer);
+    var renderLineCount = _.bind(currentRenderer.renderLineCount, currentRenderer);
+    var renderNextPiece = _.bind(currentRenderer.renderNextPiece, currentRenderer);
 
     renderBoard(board);
 
     function init () {
       movePiece();
+      queueRandomPiece();
       addNewPiece(getNextPiece());
       renderLineCount(lineCount);
     }
