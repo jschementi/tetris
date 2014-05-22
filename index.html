@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #board .block {
+      width: 20px;
+      height: 20px;
+      background: gray;
+      float: left;
+      border: 1px solid gray;
+    }
+    #board .next {
+      clear: left;
+    }
+    #board .space {
+      width: 20px;
+      height: 20px;
+      background: none;
+      float: left;
+      border: 1px solid #eee;
+    }
+    #board .block.r {
+      background: red;
+      border: 1px solid red;
+    }
+    #board .block.c {
+      background: cyan;
+      border: 1px solid cyan;
+    }
+    #board .block.g {
+      background: green;
+      border: 1px solid green;
+    }
+    #board .block.b {
+      background: blue;
+      border: 1px solid blue;
+    }
+    #board .block.y {
+      background: yellow;
+      border: 1px solid yellow;
+    }
+    #board .block.m {
+      background: magenta;
+      border: 1px solid magenta;
+    }
+  </style>
+</head>
+<body>
+  <div id="tetris">
+    <div id="current-piece"></div>
+    <div id="board">
+    </div>
+  </div>
+  <script src="bower_components/lodash/dist/lodash.js"></script>
+  <script src="bower_components/zepto/zepto.js"></script>
+  <script src="bower_components/backbone/backbone.js"></script>
+  <script src="bower_components/mathjs/dist/math.js"></script>
+  <script>
+    var math = mathjs();
+
+    var pieces = [
+      '    \n'+
+      '    \n'+
+      '    \n'+
+      'rrrr',
+
+      'cc\n'+
+      'cc',
+
+      '   \n'+
+      'gg \n'+
+      ' gg',
+
+      '   \n'+
+      ' bb\n'+
+      'bb ',
+
+      'y  \n' +
+      'y  \n' +
+      'yy ',
+
+      ' m \n' +
+      ' m \n' +
+      'mm ',
+
+      '   \n' +
+      ' - \n' +
+      '---'
+    ];
+
+    var board = [
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    ];
+
+    var boardWidth = board[0].length;
+    var boardHeight = board.length;
+
+    var currentPiece = null;
+
+    function rotateCurrentPiece (direction) {
+      var curp = currentPiece;
+      if (!curp) return;
+      var newcurp = [];
+      var maxx = _.max(_.map(curp, function (p) { return p[0]; }));
+      var minx = _.min(_.map(curp, function (p) { return p[0]; }));
+      var maxy = _.max(_.map(curp, function (p) { return p[1]; }));
+      var miny = _.min(_.map(curp, function (p) { return p[1]; }));
+      var size = _.max([maxx-minx, maxy-miny]) + 1;
+      for (var i = 0; i < size; i++) {
+        for (var j = 0; j < size; j++) {
+          var ii;
+          var jj;
+          if (direction === 0) {
+            ii = i;
+            jj = j;
+          } else if (direction < 0) {
+            jj = size - 1 - i;
+            ii = j;
+          } else if (direction > 0) {
+            ii = size - 1 - j;
+            jj = i;
+          }
+          for (var k = 0; k < curp.length; k++) {
+            if (curp[k][0] == i+minx && curp[k][1] == j+miny) {
+              newcurp.push([ii+minx,jj+miny]);
+              break;
+            }
+          }
+        }
+      }
+      var colors = [];
+      for (var i = 0; i < curp.length; i++) {
+        colors.push(board[curp[i][0]][curp[i][1]]);
+        board[curp[i][0]][curp[i][1]] = ' ';
+      }
+      for (var i = 0; i < newcurp.length; i++) {
+        board[newcurp[i][0]][newcurp[i][1]] = colors[i];
+      }
+      currentPiece = newcurp;
+      renderBoard(board);
+    }
+
+    function getNextPiece () {
+      return pieces[Math.floor(Math.random() * pieces.length)];
+    }
+
+    function addNewPiece (piece) {
+      var lines = piece.split('\n');
+      var curp = [];
+      for (var i = 0; i < lines.length; i++) {
+        for (var j = 0; j < lines[i].length; j++) {
+          if (lines[i][j] !== ' ') {
+            board[i][j+3] = lines[i][j];
+            curp.push([i,j+3]);
+          }
+        }
+      }
+      currentPiece = curp;
+      renderBoard(board);
+    }
+
+    function movePiece () {
+      window.addEventListener("keydown", moveSomething, false);
+
+      function moveSomething(e) {
+        switch(e.keyCode) {
+          case 37:
+            // left key pressed
+            translateCurrentPiece([0, -1]);
+            break;
+          case 38:
+            // up key pressed
+            rotateCurrentPiece(1);
+            break;
+          case 39:
+            // right key pressed
+            translateCurrentPiece([0, 1]);
+            break;
+          case 40:
+            // down key pressed
+            var stopped = false;
+            while(!stopped) {
+              stopped = translateCurrentPiece([1, 0]);
+            }
+            break;
+        }
+      }
+    }
+
+    function translateCurrentPiece (direction) {
+      var curp = currentPiece;
+      var stopped = false;
+      if (curp) {
+        for (var i = 0; i < curp.length; i++) {
+          var curpx = curp[i][0];
+          var curpy = curp[i][1];
+          curpx += direction[0];
+          curpy += direction[1];
+          if (curpx >= boardHeight  || curpx < 0 ||
+              curpy >= boardWidth || curpy < 0
+          ) {
+            stopped = true;
+            return stopped;
+          }
+        }
+        var colors = [];
+        for (var i = 0; i < curp.length; i++) {
+          colors.push(board[curp[i][0]][curp[i][1]]);
+          board[curp[i][0]][curp[i][1]] = ' ';
+        }
+        for (var i = 0; i < curp.length; i++) {
+          var curpx = curp[i][0] + direction[0];
+          var curpy = curp[i][1] + direction[1];
+          if (board[curpx][curpy] !== ' ') {
+            stopped = true;
+            break;
+          }
+        }
+        if (!stopped) {
+          for (var i = 0; i < curp.length; i++) {
+            curp[i][0] += direction[0];
+            curp[i][1] += direction[1];
+          }
+        }
+        for (var i = 0; i < curp.length; i++) {
+          board[curp[i][0]][curp[i][1]] = colors[i];
+        }
+      }
+      renderBoard(board);
+      return stopped;
+    }
+
+    var renderLoopInterval = setInterval(function () {
+      var stopped = translateCurrentPiece([1, 0]);
+      if (stopped) {
+        addNewPiece(getNextPiece());
+      }
+    }, 250);
+
+    var HTMLRenderer = {
+      renderBoard: function (board) {
+        var el = $('#board').empty();
+        for (var i = 0; i < board.length; i++) {
+          for (var j = 0; j < board[i].length; j++) {
+            if (board[i][j] !== ' ') {
+              el.append($('<div/>').addClass('block').addClass(board[i][j]));
+            } else {
+              el.append($('<div/>').addClass('space'));
+            }
+          }
+          el.append($('<div/>').addClass('next'));
+        }
+      }
+    };
+
+    var TextRenderer = {
+      renderBoard: function (piece) {
+
+      }
+    };
+
+    var currentRenderer = HTMLRenderer;
+
+    var renderBoard = currentRenderer.renderBoard;
+
+    renderBoard(board);
+
+    function init () {
+      movePiece();
+      addNewPiece(getNextPiece());
+    }
+
+  </script>
+</body>
+</html>
