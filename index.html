@@ -147,15 +147,21 @@
           }
         }
       }
+      if (checkBoardCollision(newcurp)) {
+        return;
+      }
       var colors = [];
       for (var i = 0; i < curp.length; i++) {
         colors.push(board[curp[i][0]][curp[i][1]]);
         board[curp[i][0]][curp[i][1]] = ' ';
       }
-      for (var i = 0; i < newcurp.length; i++) {
-        board[newcurp[i][0]][newcurp[i][1]] = colors[i];
+      if (!checkBlockCollision(newcurp)) {
+        currentPiece = newcurp;
+        curp = currentPiece;
       }
-      currentPiece = newcurp;
+      for (var i = 0; i < newcurp.length; i++) {
+        board[curp[i][0]][curp[i][1]] = colors[i];
+      }
       renderBoard(board);
     }
 
@@ -206,39 +212,55 @@
       }
     }
 
+    function checkBoardCollision (curp) {
+      for (var i = 0; i < curp.length; i++) {
+        var curpx = curp[i][0];
+        var curpy = curp[i][1];
+        if (curpx >= boardHeight  || curpx < 0 ||
+            curpy >= boardWidth || curpy < 0
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function checkBlockCollision (curp) {
+      for (var i = 0; i < curp.length; i++) {
+        var curpx = curp[i][0];
+        var curpy = curp[i][1];
+        if (board[curpx][curpy] !== ' ') {
+          return true;
+        }
+      }
+      return false;
+    }
+
     function translateCurrentPiece (direction) {
       var curp = currentPiece;
       var stopped = false;
       if (curp) {
+        var newcurp = [];
         for (var i = 0; i < curp.length; i++) {
-          var curpx = curp[i][0];
-          var curpy = curp[i][1];
-          curpx += direction[0];
-          curpy += direction[1];
-          if (curpx >= boardHeight  || curpx < 0 ||
-              curpy >= boardWidth || curpy < 0
-          ) {
-            stopped = true;
-            return stopped;
-          }
+          newcurp.push([
+            curp[i][0] + direction[0],
+            curp[i][1] + direction[1]
+          ]);
+        }
+        stopped = checkBoardCollision(newcurp);
+        if (stopped) {
+          return stopped;
         }
         var colors = [];
         for (var i = 0; i < curp.length; i++) {
           colors.push(board[curp[i][0]][curp[i][1]]);
           board[curp[i][0]][curp[i][1]] = ' ';
         }
-        for (var i = 0; i < curp.length; i++) {
-          var curpx = curp[i][0] + direction[0];
-          var curpy = curp[i][1] + direction[1];
-          if (board[curpx][curpy] !== ' ') {
-            stopped = true;
-            break;
-          }
-        }
+        stopped = checkBlockCollision(newcurp);
         if (!stopped) {
           for (var i = 0; i < curp.length; i++) {
-            curp[i][0] += direction[0];
-            curp[i][1] += direction[1];
+            curp[i][0] = newcurp[i][0];
+            curp[i][1] = newcurp[i][1];
           }
         }
         for (var i = 0; i < curp.length; i++) {
