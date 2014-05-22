@@ -43,6 +43,33 @@
       background: magenta;
       border: 1px solid magenta;
     }
+    #keypad {
+      float: left;
+    }
+    #keypad > * {
+      float: left;
+      width: 50px;
+      height: 50px;
+      background: #ccc;
+      font-size: 2em;
+      line-height: 50px;
+      border: 1px solid white;
+      text-align: center;
+      cursor: pointer;
+      outline: none;
+    }
+    #keypad > :active {
+      color: white;
+      background: black;
+    }
+    #keypad #left {
+      clear: left;
+    }
+    #keypad #space {
+      width: 50px;
+      height: 50px;
+      background: none;
+    }
   </style>
 </head>
 <body>
@@ -51,6 +78,13 @@
     <div id="board">
     </div>
     <button name="start">Start</button>
+    <div id="keypad">
+      <div id="space"></div>
+      <div id="up" data-keycode="38">&#9650;</div>
+      <div id="left" data-keycode="37">&#9664;</div>
+      <div id="down" data-keycode="40">&#9660;</div>
+      <div id="right" data-keycode="39">&#9654;</div>
+    </div>
   </div>
   <script src="bower_components/lodash/dist/lodash.js"></script>
   <script src="bower_components/zepto/zepto.js"></script>
@@ -187,6 +221,11 @@
 
     function movePiece () {
       window.addEventListener("keydown", moveSomething, false);
+
+      $('#keypad > *').on('touchend', function () {
+        var keyCode = parseInt($(this).attr('data-keycode'), 10);
+        moveSomething({keyCode: keyCode});
+      });
 
       function moveSomething(e) {
         if (paused) return;
