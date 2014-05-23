@@ -1,1 +1,16 @@
-bower_components
+bower_components/lodash/dist/lodash.js
+bower_components/lodash/dist/lodash.compat.min.js
+bower_components/lodash/dist/lodash.compat.js
+bower_components/lodash/bower.json
+bower_components/lodash/.bower.json
+bower_components/lodash/dist/lodash.underscore.js
+bower_components/lodash/dist/lodash.underscore.min.js
+bower_components/lodash/LICENSE.txt
+bower_components/zepto/.bower.json
+bower_components/zepto/bower.json
+bower_components/zepto/component.json
+bower_components/zepto/composer.json
+bower_components/zepto/Makefile
+bower_components/zepto/README.md
+bower_components/zepto/zepto.js
+bower_components/zepto/.gitignore
