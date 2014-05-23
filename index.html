@@ -164,10 +164,13 @@
 
     var boardWidth = board[0].length;
     var boardHeight = board.length;
-
     var currentPiece = null;
-
+    var nextPiece = null;
     var lineCount = 0;
+    var renderLoopInterval = null;
+    var started = false;
+    var paused = true;
+    var framerate = 250;
 
     function rotateCurrentPiece (direction) {
       var curp = currentPiece;
@@ -217,8 +220,6 @@
       }
       renderBoard(board);
     }
-
-    var nextPiece = null;
 
     function queueRandomPiece () {
       var piece = getRandomPiece();
@@ -355,9 +356,6 @@
       renderBoard(board);
     }
 
-    var renderLoopInterval = null;
-    var paused = true;
-
     function startRenderLoop () {
       if (!paused) return;
       var waitATick = false;
@@ -373,7 +371,7 @@
             addNewPiece(getNextPiece());
           }
         }
-      }, 250);
+      }, framerate);
       paused = false;
     }
 
@@ -429,7 +427,6 @@
     };
 
     var currentRenderer = HTMLRenderer;
-
     var renderBoard = _.bind(currentRenderer.renderBoard, currentRenderer);
     var renderLineCount = _.bind(currentRenderer.renderLineCount, currentRenderer);
     var renderNextPiece = _.bind(currentRenderer.renderNextPiece, currentRenderer);
@@ -443,7 +440,6 @@
       renderLineCount(lineCount);
     }
 
-    var started = false;
     $('button[name=start]').click(function () {
       if (!started) {
         init();
