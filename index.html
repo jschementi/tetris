@@ -364,11 +364,18 @@
 
     function startRenderLoop () {
       if (!paused) return;
+      var waitATick = false;
       renderLoopInterval = setInterval(function () {
         var stopped = translateCurrentPiece([1, 0]);
         if (stopped) {
-          processLines();
-          addNewPiece(getNextPiece());
+          if (!waitATick) {
+            waitATick = true;
+            return;
+          } else {
+            waitATick = false;
+            processLines();
+            addNewPiece(getNextPiece());
+          }
         }
       }, 250);
       paused = false;
