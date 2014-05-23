@@ -247,17 +247,27 @@
     function addNewPiece (piece) {
       var lines = compressPiece(piece).split('\n');
       var curp = [];
+      var colors = [];
       for (var i = 0; i < lines.length; i++) {
         for (var j = 0; j < lines[i].length; j++) {
           if (lines[i][j] !== ' ') {
-            board[i][j+3] = lines[i][j];
             curp.push([i,j+3]);
+            colors.push(lines[i][j]);
           }
         }
       }
-      currentPiece = curp;
-      renderBoard(board);
-      renderNextPiece();
+      if (checkBlockCollision(curp)) {
+        // TODO game over
+        alert('Game over!')
+        window.location.reload();
+      } else {
+        for (var i = 0; i < curp.length; i++) {
+          board[curp[i][0]][curp[i][1]] = colors[i];
+        }
+        currentPiece = curp;
+        renderBoard(board);
+        renderNextPiece();
+      }
     }
 
     function movePiece () {
