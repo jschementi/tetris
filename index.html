@@ -196,7 +196,7 @@
             jj = i;
           }
           for (var k = 0; k < curp.length; k++) {
-            if (curp[k][0] == i+minx && curp[k][1] == j+miny) {
+            if (curp[k][0] === i+minx && curp[k][1] === j+miny) {
               newcurp.push([ii+minx,jj+miny]);
               break;
             }
@@ -239,7 +239,7 @@
     function compressPiece (piece) {
       return _.filter(piece.split('\n'), function (line) {
         return !_.all(line, function (c) {
-          return c == ' ';
+          return c === ' ';
         });
       }).join('\n');
     }
