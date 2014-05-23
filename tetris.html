@@ -272,8 +272,9 @@
 
     function movePiece () {
       window.addEventListener("keydown", moveSomething, false);
+      var clickevt = ("ontouchend" in document.documentElement) ? "touchend" : "click";
 
-      $('#keypad > *').on('touchend', function () {
+      $('#keypad > *').on(clickevt, function () {
         var keyCode = parseInt($(this).attr('data-keycode'), 10);
         moveSomething({keyCode: keyCode});
       });
